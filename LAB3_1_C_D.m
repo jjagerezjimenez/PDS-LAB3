@@ -40,7 +40,7 @@ for k = 1:length(archivosAudio)
 end
 
 % Seleccionar el canal a graficar (del 1 al 4)
-k = 4;
+k = 1;
 
 % Obtener la se?al modulada
 Xk_modulada = senalesModuladas{k};
