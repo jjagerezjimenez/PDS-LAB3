@@ -40,7 +40,7 @@ for k = 1:length(archivosAudio)
 end
 
 % Seleccionar el canal a graficar (del 1 al 4)
-k = 1;
+k = 4;
 
 % Obtener la se?al modulada
 Xk_modulada = senalesModuladas{k};
@@ -75,9 +75,6 @@ grid on;
 % Ajustar los l?mites del eje x para enfocarse en la regi?n de inter?s
 xlim([0, 100000]);  % Solo frecuencias positivas
 
-% CONSULTAR por el ancho de banda ioncrementado, se que en este caso la
-% modulacion nos devuelve un ancho de banda mas grande ya que hablamos de
-% DBL, pero deberia ser el doble, no 10 veces mas, tal vez el trabajar con
-% senales discretas tiene algo que ver?
+
 
 
