@@ -33,6 +33,15 @@ for k = 1:length(archivosAudio)
     % Guardar las se?ales filtradas
     audiowrite(['filtrada_', archivosAudio{k}], senalesFiltradas{k}, Fs);
     
+    % Graficar amplitud vs tiempo
+    t = (0:length(senalesFiltradas{k})-1) / Fs; % Vector de tiempo
+    figure;
+    plot(t, senalesFiltradas{k});
+    xlabel('Tiempo (s)');
+    ylabel('Amplitud');
+    title(['Se?al Filtrada Canal ', num2str(k), ' en el Tiempo']);
+    grid on;
+    
     % Espectro de frecuencia de cada se?al filtrada
     L = length(senalesFiltradas{k});
     Y = fftshift(fft(senalesFiltradas{k}));
@@ -84,5 +93,4 @@ ylabel('Magnitud');
 title('Espectro de Frecuencia - Se?al de Banda Ancha');
 grid on;
 xlim([0, 100000]); % Ajuste
-
 
