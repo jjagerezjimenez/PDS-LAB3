@@ -1,3 +1,6 @@
+% Cerrar todas las figuras abiertas
+close all;
+
 % Configuraci?n inicial
 Fs = 328000; % Frecuencia de muestreo
 archivosAudio = {'ernesto328k.wav', 'hector328k.wav', 'juanjo328k.wav', 'santi328k.wav'};
@@ -26,12 +29,18 @@ Fc = 60000; % Frecuencia de corte
 Wn = Fc / (Fs / 2); % Normalizaci?n
 
 % Incrementar el orden del filtro y usar un filtro Chebyshev
-orden = 10; % Ajusta seg?n sea necesario
+orden = 20; % Ajusta seg?n sea necesario
 Rp = 1; % Ondulaci?n permitida en la banda de paso (en dB)
 [b, a] = cheby1(orden, Rp, Wn, 'high'); % Filtro pasa-altos Chebyshev
 
 % Verificar la respuesta del filtro
-fvtool(b, a); % Visualizar la respuesta en frecuencia
+[H, f] = freqz(b, a, 1024, Fs); % Respuesta en frecuencia en Hz
+figure;
+plot(f, 20*log10(abs(H))); % Graficar en dB
+xlabel('Frecuencia (Hz)');
+ylabel('Magnitud (dB)');
+title('Respuesta del Filtro Pasa-Altos');
+grid on;
 
 % Aplicar el filtro a cada se?al modulada
 senalesFiltradas = cell(1, length(senalesModuladas)); % Inicializar
@@ -60,7 +69,7 @@ xlim([0, 3]); % Ajuste
 % Espectro de frecuencia
 L = length(senal);
 Y = fftshift(fft(senal));
-f = (-L/2:L/2-1) * (Fs / L);
+f = (-L/2:L/2-1) * (Fs / L); % Eje de frecuencia en Hz
 P = abs(Y) / L;
 
 figure;
@@ -96,7 +105,7 @@ xlim([0, 3]); % Ajuste
 % Espectro de frecuencia
 L = length(senalBandaAncha);
 Y = fftshift(fft(senalBandaAncha));
-f = (-L/2:L/2-1) * (Fs / L);
+f = (-L/2:L/2-1) * (Fs / L); % Eje de frecuencia en Hz
 P = abs(Y) / L;
 
 figure;
@@ -106,4 +115,5 @@ ylabel('Magnitud');
 title('Espectro de Frecuencia - Se?al de Banda Ancha');
 grid on;
 xlim([0, 100000]); % Ajuste
+
 
