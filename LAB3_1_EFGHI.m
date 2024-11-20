@@ -6,8 +6,8 @@ Fs = 328000; % Frecuencia de muestreo
 archivosAudio = {'ernesto328k.wav', 'hector328k.wav', 'juanjo328k.wav', 'santi328k.wav'};
 frecuenciasPortadoras = [60000, 64000, 68000, 72000]; % Frecuencias portadoras
 
-% Modulaci?n de las se?ales
-senalesModuladas = cell(1, length(archivosAudio)); % Inicializar
+% Modulaci?n y filtrado de las se?ales
+senalesFiltradas = cell(1, length(archivosAudio)); % Inicializar
 
 for k = 1:length(archivosAudio)
     % Leer cada archivo de audio
@@ -18,69 +18,38 @@ for k = 1:length(archivosAudio)
     omega_k = 2 * pi * frecuenciasPortadoras(k) / Fs;
     
     % Modulaci?n
-    senalesModuladas{k} = Xk_n .* cos(omega_k * n);
+    senalModulada = Xk_n .* cos(omega_k * n);
     
-    % Guardar las se?ales moduladas
-    audiowrite(['modulada_', archivosAudio{k}], senalesModuladas{k}, Fs);
-end
-
-% Dise?o del filtro pasa-altos para eliminar la banda lateral inferior
-Fc = 60000; % Frecuencia de corte
-Wn = Fc / (Fs / 2); % Normalizaci?n
-
-% Incrementar el orden del filtro y usar un filtro Chebyshev
-orden = 20; % Ajusta seg?n sea necesario
-Rp = 1; % Ondulaci?n permitida en la banda de paso (en dB)
-[b, a] = cheby1(orden, Rp, Wn, 'high'); % Filtro pasa-altos Chebyshev
-
-% Verificar la respuesta del filtro
-[H, f] = freqz(b, a, 1024, Fs); % Respuesta en frecuencia en Hz
-figure;
-plot(f, 20*log10(abs(H))); % Graficar en dB
-xlabel('Frecuencia (Hz)');
-ylabel('Magnitud (dB)');
-title('Respuesta del Filtro Pasa-Altos');
-grid on;
-
-% Aplicar el filtro a cada se?al modulada
-senalesFiltradas = cell(1, length(senalesModuladas)); % Inicializar
-
-for k = 1:length(senalesModuladas)
-    % Filtrar la se?al
-    senalesFiltradas{k} = filter(b, a, senalesModuladas{k});
+    % Dise?o del filtro pasa-altos para este canal
+    Fc = frecuenciasPortadoras(k); % Frecuencia de corte para este canal
+    Wn = Fc / (Fs / 2); % Normalizaci?n
+    orden = 20; % Orden del filtro
+    Rp = 1; % Ondulaci?n permitida en la banda de paso (en dB)
+    [b, a] = cheby1(orden, Rp, Wn, 'high'); % Filtro pasa-altos Chebyshev
+    
+    % Aplicar el filtro pasa-altos
+    senalesFiltradas{k} = filter(b, a, senalModulada);
     
     % Guardar las se?ales filtradas
     audiowrite(['filtrada_', archivosAudio{k}], senalesFiltradas{k}, Fs);
+    
+    % Espectro de frecuencia de cada se?al filtrada
+    L = length(senalesFiltradas{k});
+    Y = fftshift(fft(senalesFiltradas{k}));
+    f = (-L/2:L/2-1) * (Fs / L); % Eje de frecuencia en Hz
+    P = abs(Y) / L;
+    
+    % Graficar espectro individual
+    figure;
+    plot(f, P);
+    xlabel('Frecuencia (Hz)');
+    ylabel('Magnitud');
+    title(['Espectro de Frecuencia - Se?al Filtrada Canal ', num2str(k)]);
+    grid on;
+    xlim([0, 100000]); % Ajuste
 end
 
-% Graficar la se?al filtrada y su espectro (ejemplo con la primera se?al)
-senal = senalesFiltradas{1}; % Seleccionar la primera se?al filtrada
-t = (0:length(senal)-1) / Fs; % Vector de tiempo
-
-% Gr?fico en el dominio del tiempo
-figure;
-plot(t, senal);
-xlabel('Tiempo (s)');
-ylabel('Amplitud');
-title('Se?al Filtrada en el Tiempo');
-grid on;
-xlim([0, 3]); % Ajuste
-
-% Espectro de frecuencia
-L = length(senal);
-Y = fftshift(fft(senal));
-f = (-L/2:L/2-1) * (Fs / L); % Eje de frecuencia en Hz
-P = abs(Y) / L;
-
-figure;
-plot(f, P);
-xlabel('Frecuencia (Hz)');
-ylabel('Magnitud');
-title('Espectro de Frecuencia - Se?al Filtrada');
-grid on;
-xlim([0, 100000]); % Ajuste
-
-% Obtener la se?al portadora de banda ancha sumando las se?ales filtradas
+% Sumar las se?ales filtradas para obtener la se?al de banda ancha
 senalBandaAncha = zeros(size(senalesFiltradas{1})); % Inicializar
 
 for k = 1:length(senalesFiltradas)
