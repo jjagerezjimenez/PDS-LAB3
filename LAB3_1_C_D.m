@@ -74,7 +74,3 @@ grid on;
 
 % Ajustar los l?mites del eje x para enfocarse en la regi?n de inter?s
 xlim([0, 100000]);  % Solo frecuencias positivas
-
-
-
-
